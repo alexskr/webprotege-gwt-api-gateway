@@ -29,10 +29,10 @@ webprotege:
     eventsqueue: webprotege-gwt-api-gateway-event-queue
     timeout: 120000
     event-subscribe: true
-  allowedOrigin: webprotege-local.edu
+  # allowedOrigin: must be supplied by the deployment (env: WEBPROTEGE_ALLOWEDORIGIN)
   minio:
     accessKey: webprotege
-    endPoint: http://webprotege-local.edu:9000
+    # endPoint: must be supplied by the deployment (env: webprotege.minio.endPoint)
     secretKey: webprotege
     bucketName: webprotege-uploads
 
@@ -44,6 +44,10 @@ spring.security.oauth2:
       authorization-grant-type: authorization_code
       scope: openid
     provider.keycloak:
-      issuer-uri: http://webprotege-local.edu/keycloak/realms/webprotege
+      # issuer-uri: must be supplied by the deployment
+      #   (env: SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER_URI).
+      # Alternatively, omit issuer-uri and provide token-uri / jwk-set-uri /
+      # user-info-uri explicitly to skip the boot-time discovery doc fetch.
       user-name-attribute: preferred_username
-  resourceserver.jwt.issuer-uri: http://webprotege-local.edu/keycloak/realms/webprotege
+  # resourceserver.jwt.issuer-uri (or jwk-set-uri) must be supplied by the deployment
+  # (env: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI).
