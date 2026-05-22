@@ -8,7 +8,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: ${{ github.actor != 'protegeproject-bot[bot]' }}
+    # Skip on forks: this workflow needs upstream's Docker Hub credentials
+    # (DOCKER_USERNAME / DOCKER_PASSWORD) and the protegeproject-bot GitHub
+    # App secrets, neither of which forks have.  Forks use publish-ghcr.yml
+    # instead, which uses GITHUB_TOKEN to push to GHCR.
+    if: ${{ github.repository == 'protegeproject/webprotege-gwt-api-gateway' && github.actor != 'protegeproject-bot[bot]' }}
     outputs:
       version: ${{ steps.release-outputs.outputs.version }}
       service: ${{ steps.release-outputs.outputs.service }}
