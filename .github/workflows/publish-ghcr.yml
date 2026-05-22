@@ -52,6 +52,14 @@ jobs:
           v=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "version=$v" >> "$GITHUB_OUTPUT"
 
+      - name: Set up QEMU
+        # Required for emulating other architectures during the buildx
+        # multi-arch image build below.
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
@@ -72,9 +80,17 @@ jobs:
             type=ref,event=branch,enable=${{ github.event_name == 'workflow_dispatch' && github.ref_name != 'main' }}
 
       - name: Build and push image
+        # The repo's Dockerfile expects a JAR_FILE build-arg (it's normally
+        # passed by dockerfile-maven-plugin during `mvn package`).  Without
+        # it, `COPY target/${JAR_FILE} ...` becomes `COPY target/ ...` and
+        # the entire target/ directory is copied as a "jarfile", producing
+        # an unstartable image.
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
+          platforms: linux/amd64,linux/arm64
+          build-args: |
+            JAR_FILE=webprotege-gwt-api-gateway-${{ steps.pom-version.outputs.version }}.jar
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
